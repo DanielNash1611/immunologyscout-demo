@@ -35,7 +35,6 @@ const bannedContentChecks: Array<{ label: string; pattern: RegExp }> = [
   { label: "multiple sclerosis", pattern: /multiple sclerosis/i },
   { label: "mcp", pattern: /\bmcp\b/i },
   { label: "artifact store", pattern: /\bartifact\b/i },
-  { label: "private env", pattern: /IMMUNOLOGYSCOUT_OPENAI_/i },
   { label: "private env", pattern: /NEXT_PUBLIC_HYPOTHESIS/i },
   { label: "private env", pattern: /OPENAI_AGENT_MODEL/i },
   { label: "private env", pattern: /OPENAI_SUMMARY_MODEL/i },

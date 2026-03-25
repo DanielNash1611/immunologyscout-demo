@@ -1,10 +1,11 @@
 import "server-only";
 import OpenAI from "openai";
+import { getConfiguredOpenAIApiKey, getDefaultSynthesisModel } from "./openaiConfig";
 
 let openAIClient: OpenAI | null = null;
 
 export function hasOpenAIApiKey(): boolean {
-  return Boolean(process.env.OPENAI_API_KEY?.trim());
+  return Boolean(getConfiguredOpenAIApiKey());
 }
 
 export function getOpenAIClient(): OpenAI {
@@ -16,19 +17,12 @@ export function getOpenAIClient(): OpenAI {
     return openAIClient;
   }
 
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = getConfiguredOpenAIApiKey();
   if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not set");
+    throw new Error("OpenAI API key is not configured");
   }
 
   openAIClient = new OpenAI({ apiKey });
   return openAIClient;
 }
-
-export function getDefaultSynthesisModel(): string {
-  return (
-    process.env.OPENAI_MODEL ||
-    process.env.SYNTHESIS_MODEL ||
-    "gpt-4.1-mini"
-  );
-}
+export { getConfiguredOpenAIApiKey, getDefaultSynthesisModel };

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { getConfiguredOpenAIApiKey } from "../lib/openaiConfig";
 import { siteConfig } from "../lib/site";
 import { searchPatentsImpl } from "../lib/tools/patents";
 import { buildPubMedTerms } from "../lib/tools/pubmed";
@@ -10,6 +11,12 @@ export async function run() {
   assert.equal(pubMedTerms.derivedFromYear, 2021);
   assert.match(pubMedTerms.primaryTerm, /IL-2/i);
   assert.match(pubMedTerms.primaryTerm, /muteins/i);
+
+  const previousOpenAIKey = process.env.OPENAI_API_KEY;
+  const previousLegacyOpenAIKey = process.env.IMMUNOLOGYSCOUT_OPENAI_API_KEY;
+  delete process.env.OPENAI_API_KEY;
+  process.env.IMMUNOLOGYSCOUT_OPENAI_API_KEY = "legacy-test-key";
+  assert.equal(getConfiguredOpenAIApiKey(), "legacy-test-key");
 
   const previousPatentKey = process.env.PATENTSVIEW_API_KEY;
   delete process.env.PATENTSVIEW_API_KEY;
@@ -23,6 +30,18 @@ export async function run() {
       process.env.PATENTSVIEW_API_KEY = previousPatentKey;
     } else {
       delete process.env.PATENTSVIEW_API_KEY;
+    }
+
+    if (previousOpenAIKey) {
+      process.env.OPENAI_API_KEY = previousOpenAIKey;
+    } else {
+      delete process.env.OPENAI_API_KEY;
+    }
+
+    if (previousLegacyOpenAIKey) {
+      process.env.IMMUNOLOGYSCOUT_OPENAI_API_KEY = previousLegacyOpenAIKey;
+    } else {
+      delete process.env.IMMUNOLOGYSCOUT_OPENAI_API_KEY;
     }
   }
 

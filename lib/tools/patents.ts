@@ -108,13 +108,16 @@ export async function searchPatentsImpl(params: {
       "patent_id",
       "patent_title",
       "patent_abstract",
-      "patent_year",
       "patent_date",
-      "patent_kind",
+      "patent_year",
+      "patent_type",
       "assignees.assignee_organization",
-      "cpc_at_issue.cpc_subgroup_id"
+      "cpc_current.cpc_section",
+      "cpc_current.cpc_class",
+      "cpc_current.cpc_subclass",
+      "cpc_current.cpc_group"
     ],
-    o: { per_page: Math.max(maxResults, 10), page: 1 },
+    o: { size: Math.max(maxResults, 10) },
     s: [{ patent_date: "desc" }]
   };
 
@@ -147,10 +150,13 @@ export async function searchPatentsImpl(params: {
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
+    const reason = response.headers.get("X-Status-Reason");
+    const reasonCode = response.headers.get("X-Status-Reason-Code");
+    const details = [reasonCode, reason, detail.slice(0, 160)].filter(Boolean).join(" | ");
     return {
       items: [],
       status: "error",
-      message: `PatentsView returned ${response.status}. ${detail.slice(0, 160)}`.trim(),
+      message: `PatentsView returned ${response.status}. ${details}`.trim(),
       provenance: {
         provider: "patentsview",
         query,
@@ -237,10 +243,10 @@ function buildPatentsViewQuery(params: {
   const clauses: any[] = [{ _and: keywordClauses }];
 
   if (params.fromYear) {
-    clauses.push({ _gte: { patent_year: params.fromYear } });
+    clauses.push({ _gte: { patent_date: `${params.fromYear}-01-01` } });
   }
   if (params.toYear) {
-    clauses.push({ _lte: { patent_year: params.toYear } });
+    clauses.push({ _lte: { patent_date: `${params.toYear}-12-31` } });
   }
 
   return clauses.length === 1 ? clauses[0] : { _and: clauses };
@@ -248,26 +254,21 @@ function buildPatentsViewQuery(params: {
 
 function keywordClause(keyword: string) {
   const text = keyword.trim();
-  const textAny = {
-    _text_any: {
-      patent_title: text,
-      patent_abstract: text
-    }
-  };
-
   if (!text.includes(" ")) {
-    return textAny;
+    return {
+      _or: [
+        { _text_any: { patent_title: text } },
+        { _text_any: { patent_abstract: text } }
+      ]
+    };
   }
 
   return {
     _or: [
-      {
-        _text_all: {
-          patent_title: text,
-          patent_abstract: text
-        }
-      },
-      textAny
+      { _text_phrase: { patent_title: text } },
+      { _text_phrase: { patent_abstract: text } },
+      { _text_all: { patent_title: text } },
+      { _text_all: { patent_abstract: text } }
     ]
   };
 }
@@ -336,7 +337,7 @@ function mapPatent(item: any): PatentMetadata | null {
   const derived = buildCanonicalPatentId({
     source: "patentsview",
     patent_id: patentIdRaw,
-    kind: typeof item?.patent_kind === "string" ? item.patent_kind : undefined
+    kind: undefined
   });
 
   const title =
@@ -381,7 +382,6 @@ function extractCpcClasses(cpcs: any): string[] {
   if (!Array.isArray(cpcs)) return [];
   const classes = cpcs
     .map((cpc) => {
-      if (typeof cpc?.cpc_subgroup_id === "string") return cpc.cpc_subgroup_id.trim();
       const combined = [
         cpc?.cpc_section,
         cpc?.cpc_class,

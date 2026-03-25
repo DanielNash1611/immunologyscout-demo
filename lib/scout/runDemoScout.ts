@@ -248,7 +248,7 @@ function buildNotices(params: {
       tone: "info",
       title: "Template synthesis mode",
       message:
-        "OPENAI_API_KEY is not configured, so the narrative synthesis is generated from a deterministic demo template."
+        "No OpenAI API key is configured, so the narrative synthesis is generated from a deterministic demo template."
     });
   }
 

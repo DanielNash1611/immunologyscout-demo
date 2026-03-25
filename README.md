@@ -55,6 +55,10 @@ Required for model-assisted synthesis:
 
 - `OPENAI_API_KEY`
 
+Also supported for compatibility with earlier deployments:
+
+- `IMMUNOLOGYSCOUT_OPENAI_API_KEY`
+
 Optional:
 
 - `OPENAI_MODEL`
@@ -62,7 +66,7 @@ Optional:
 - `PUBMED_API_KEY`
 - `PATENTSVIEW_API_KEY`
 
-If `OPENAI_API_KEY` is omitted, the demo still works with a deterministic synthesis fallback.
+If neither OpenAI key variable is set, the demo still works with a deterministic synthesis fallback.
 
 If `PATENTSVIEW_API_KEY` is omitted, the app degrades gracefully and reports that patent coverage is unavailable.
 
@@ -88,6 +92,7 @@ Deploy this repo as its own standalone Vercel project.
 Recommended Vercel env vars:
 
 - `OPENAI_API_KEY`
+- `IMMUNOLOGYSCOUT_OPENAI_API_KEY`
 - `OPENAI_MODEL`
 - `SYNTHESIS_MODEL`
 - `PUBMED_API_KEY`

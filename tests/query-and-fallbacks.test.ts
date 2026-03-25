@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { getConfiguredOpenAIApiKey } from "../lib/openaiConfig";
 import { siteConfig } from "../lib/site";
-import { searchPatentsImpl } from "../lib/tools/patents";
+import {
+  buildPatentConceptGroups,
+  buildPatentQueryPlans,
+  searchPatentsImpl
+} from "../lib/tools/patents";
 import { buildPubMedTerms } from "../lib/tools/pubmed";
 
 export const name = "query-and-fallbacks";
@@ -22,6 +26,23 @@ export async function run() {
   delete process.env.PATENTSVIEW_API_KEY;
 
   try {
+    const tregGroups = buildPatentConceptGroups("Treg stability in inflamed tissue");
+    assert.ok(tregGroups.some((group) => group.id === "treg"));
+    assert.ok(tregGroups.some((group) => group.id === "inflammation"));
+
+    const il2Groups = buildPatentConceptGroups("IL-2 muteins for autoimmunity");
+    assert.ok(il2Groups.some((group) => group.id === "il2"));
+    assert.ok(il2Groups.some((group) => group.id === "mutein"));
+    assert.ok(il2Groups.some((group) => group.id === "autoimmunity"));
+
+    const plans = buildPatentQueryPlans({
+      query: "IL-2 muteins for autoimmunity",
+      keywords: ["il-2", "muteins", "autoimmunity"],
+      conceptGroups: il2Groups,
+      maxResults: 8
+    });
+    assert.ok(plans.length >= 3);
+
     const patentResult = await searchPatentsImpl({ query: "IL-2 mutein" });
     assert.equal(patentResult.status, "error");
     assert.match(patentResult.message ?? "", /PATENTSVIEW_API_KEY/);

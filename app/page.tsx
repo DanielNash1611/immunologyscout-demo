@@ -1,4 +1,5 @@
 "use client";
+import { analytics } from "@/lib/analytics";
 
 import { FormEvent, useEffect, useState } from "react";
 import { siteConfig, sampleQueries } from "@/lib/site";
@@ -51,6 +52,7 @@ export default function HomePage() {
     setIsLoading(true);
     setError(null);
     setResult(null);
+    void analytics.track("research_started");
 
     try {
       const response = await fetch("/api/scout", {
@@ -71,6 +73,7 @@ export default function HomePage() {
       }
 
       setResult(payload as ScoutResponse);
+      void analytics.track("research_completed");
     } catch (requestError) {
       setError(
         requestError instanceof Error

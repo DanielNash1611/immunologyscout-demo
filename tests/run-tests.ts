@@ -3,7 +3,7 @@ type TestModule = {
   run: () => Promise<void> | void;
 };
 
-const tests: string[] = ["./query-and-fallbacks.test.ts", "./public-safety.test.ts"];
+const tests: string[] = ["./query-and-fallbacks.test.ts", "./luna-synthesis.test.ts", "./public-safety.test.ts"];
 
 async function main() {
   let failed = 0;

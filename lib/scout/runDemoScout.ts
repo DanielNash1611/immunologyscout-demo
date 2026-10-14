@@ -115,8 +115,10 @@ async function buildSynthesis(params: {
 
   try {
     const client = getOpenAIClient();
+    const model = getDefaultSynthesisModel();
     const response: any = await client.responses.create({
-      model: getDefaultSynthesisModel(),
+      model,
+      ...(model === "gpt-6-luna" ? { reasoning: { effort: "none" as const } } : {}),
       input: [
         {
           role: "system",

@@ -7,5 +7,5 @@ export function getConfiguredOpenAIApiKey(): string | undefined {
 }
 
 export function getDefaultSynthesisModel(): string {
-  return process.env.OPENAI_MODEL || process.env.SYNTHESIS_MODEL || "gpt-4.1-mini";
+  return process.env.OPENAI_MODEL || process.env.SYNTHESIS_MODEL || "gpt-6-luna";
 }

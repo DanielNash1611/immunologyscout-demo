@@ -57,7 +57,8 @@ export async function run() {
             type: "paragraph", text: "Synthetic cell evidence; no clinical conclusion.",
             citations: [{ kind: "url", url: "https://example.invalid/synthetic-receptor" }]
           }]
-        }]
+        }],
+        nextSteps: [{ text: "Review the supplied fictional evidence and its limitations.", citations: [] }]
       },
       synthesis_markdown: "AI fixture summary: synthetic cells only."
     };
@@ -82,6 +83,7 @@ export async function run() {
       const request = requests.at(-1)!;
       assert.equal(request.model, model);
       assert.equal("reasoning" in request, model === "gpt-6-luna");
+      assert.equal("text" in request, model === "gpt-6-luna");
       if (model === "gpt-6-luna") assert.deepEqual(request.reasoning, { effort: "none" });
       const sentRecords = JSON.parse((request.input as Array<{ content: Array<{ text: string }> }>)[1].content[0].text);
       assert.equal(sentRecords.papers[0].title, "Synthetic receptor study");

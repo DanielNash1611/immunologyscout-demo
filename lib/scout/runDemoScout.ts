@@ -1,4 +1,5 @@
 import { getDefaultSynthesisModel, getOpenAIClient, hasOpenAIApiKey } from "@/lib/openai";
+import { lunaSynthesisFormat, parseLunaSynthesisEnvelope } from "@/lib/lunaSynthesisContract";
 import {
   synthesisEnvelopeSchema,
   type CitationRef,
@@ -118,7 +119,10 @@ async function buildSynthesis(params: {
     const model = getDefaultSynthesisModel();
     const response: any = await client.responses.create({
       model,
-      ...(model === "gpt-6-luna" ? { reasoning: { effort: "none" as const } } : {}),
+      ...(model === "gpt-6-luna" ? {
+        reasoning: { effort: "none" as const },
+        text: { format: lunaSynthesisFormat }
+      } : {}),
       input: [
         {
           role: "system",
@@ -139,7 +143,12 @@ async function buildSynthesis(params: {
                 {
                   instructions: {
                     title: "Create a short synthesis widget for an immunology research assistant demo.",
-                    schema_notes: {
+                    schema_notes: model === "gpt-6-luna" ? {
+                      required_output: "Follow the supplied strict JSON schema. Include both synthesis_widget and synthesis_markdown.",
+                      lists: "Every list item and next step is an object with text and citations. Include at least one next step.",
+                      citations: "Use only supplied identifiers or URLs. URL citations use kind=url and url; other citations use kind and id. Use an empty citations array when no source supports the text.",
+                      brevity: "Keep the research brief and next steps concise. State missing evidence explicitly."
+                    } : {
                       synthesis_widget: {
                         schema_version: "1.0",
                         title: "string",
@@ -180,7 +189,9 @@ async function buildSynthesis(params: {
 
     const rawText = extractResponseText(response);
     const parsedJson = JSON.parse(stripCodeFences(rawText));
-    const envelope = synthesisEnvelopeSchema.parse(parsedJson);
+    const envelope = model === "gpt-6-luna"
+      ? parseLunaSynthesisEnvelope(parsedJson)
+      : synthesisEnvelopeSchema.parse(parsedJson);
 
     if (!envelope.synthesis_widget && !envelope.synthesis_markdown) {
       return { envelope: fallbackEnvelope, source: "fallback" };

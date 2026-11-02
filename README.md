@@ -111,3 +111,9 @@ The public deployment should not share private-product env vars, persistence lay
 ## License
 
 No license is included by default. Add one explicitly if you want to permit reuse.
+
+## Request limits
+
+The search endpoint accepts at most 4 KiB of JSON, 32 keys/array elements, 500 characters per string/key (including the query), and depth 4. The UI sends one query plus scalar search options.
+
+The full decoded request is checked before schema validation or search work, including unknown fields. Actual streamed bytes are counted even without Content-Length. Compressed requests are rejected (415), malformed JSON returns 400, and exceeded budgets return 413. These controls apply to incoming requests; search results retain their existing format.

@@ -1,8 +1,9 @@
+import { readLimitedJson, InputLimitError } from "@/lib/inputLimits";
 import { z } from "zod";
 import { runDemoScout } from "@/lib/scout/runDemoScout";
 
 const requestSchema = z.object({
-  query: z.string().trim().min(1, "Query is required."),
+  query: z.string().trim().min(1, "Query is required.").max(500, "Query must be at most 500 characters."),
   includePatents: z.boolean().optional(),
   fromYear: z.number().int().min(1900).max(2100).optional(),
   toYear: z.number().int().min(1900).max(2100).optional(),
@@ -13,9 +14,9 @@ export async function POST(request: Request) {
   let json: unknown;
 
   try {
-    json = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
+    json = await readLimitedJson(request);
+  } catch (error) {
+    return Response.json({ error: error instanceof InputLimitError ? error.message : "Invalid JSON body." }, { status: error instanceof InputLimitError ? error.status : 400 });
   }
 
   const parsed = requestSchema.safeParse(json);

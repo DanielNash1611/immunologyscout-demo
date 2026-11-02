@@ -25,14 +25,12 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "autoprefixer": "^10.4.20",
-    "eslint": "10.11.0",
-    "eslint-config-next": "16.4.1",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
     "tsx": "^4.21.0",
     "typescript": "^5.6.3"
   },
   "engines": {
-    "node": ">=22.22.0 <23 || >=24.13.0 <25"
+    "node": ">=22.23.4 <23 || >=24.22.1 <25"
   }
 }

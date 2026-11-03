@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const { smokeNextSecurity } = require('./next-security-smoke.cjs');
 const { spawn } = require('node:child_process');
 const { setTimeout: delay } = require('node:timers/promises');
 const env = { PATH: process.env.PATH, HOME: process.env.HOME, NEXT_TELEMETRY_DISABLED: '1', CI: 'true' };
@@ -20,6 +21,8 @@ async function main() {
     const html = await response.text();
     assert.match(html, /Immunology Scout/);
     
+    assert.equal(response.headers.get('x-middleware-set-cookie'), null);
+    await smokeNextSecurity(url);
     console.log('PASS production HTTP smoke (loopback, no integration requests)');
   } finally {
     server.kill('SIGTERM');
